@@ -36,6 +36,26 @@ exports.admin_login = asyncHandler(async (req, res, next) => {
     res.json({ token });
   });
 });
+exports.get_posts = asyncHandler(async (req, res, next) => {
+  const bearerHeader = req.headers["authorization"];
+  if (bearerHeader) {
+    const bearer = bearerHeader.split(" ");
+    const token = bearer[1];
+    jwt.verify(token, process.env.JWT_SECRET, async (err, authData) => {
+      if (err) {
+        res.sendStatus(401);
+      } else {
+        const allPostForAdmin = await BlogPost.find().exec();
+        res.json({ allPostForAdmin });
+      }
+    });
+  } else {
+    const allPostForUsers = await BlogPost.find({
+      Post_status: "published",
+    }).exec();
+    res.json({ allPostForUsers });
+  }
+});
 exports.post_creation = [
   body("Post_title", "post title cannot be empty")
     .trim()
@@ -47,7 +67,6 @@ exports.post_creation = [
     .escape(),
   asyncHandler(async (req, res, next) => {
     const errors = validationResult(req);
-    console.log(errors.isEmpty);
     const newPost = new BlogPost({
       Post_title: req.body.Post_title,
       Post_Content: req.body.Post_Content,
@@ -70,7 +89,6 @@ exports.post_creation = [
               errors: errors,
             });
           } else {
-            console.log("heloo")
             await newPost.save();
             res.status(201).send("post created");
           }

@@ -10,6 +10,8 @@ router.get("/", function (req, res, next) {
 });
 router.get("/login", adminController.admin_index);
 router.post("/login", adminController.admin_login);
+router.get("/posts", adminController.get_posts);
 router.post("/posts", adminController.post_creation);
-
+router.get("/posts/:postId", commentController.get_comments);
+router.post("/posts/:postId/comment", commentController.add_comment);
 module.exports = router;
