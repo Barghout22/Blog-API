@@ -1,5 +1,6 @@
 const Admin = require("../models/admin");
 const BlogPost = require("../models/blogPost");
+const Comment = require("../models/comment");
 const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -99,3 +100,86 @@ exports.post_creation = [
     }
   }),
 ];
+exports.post_update = [
+  body("Post_title", "post title cannot be empty")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  body("Post_Content", "post body cannot be empty")
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+  asyncHandler(async (req, res, next) => {
+    const errors = validationResult(req);
+
+    const newPost = new BlogPost({
+      Post_title: req.body.Post_title,
+      Post_Content: req.body.Post_Content,
+      Post_status: req.body.Post_status,
+      Post_timeStamp: Date.now(),
+      _id: req.params.postId,
+    });
+    const bearerHeader = req.headers["authorization"];
+    if (bearerHeader) {
+      const bearer = bearerHeader.split(" ");
+      const token = bearer[1];
+      jwt.verify(token, process.env.JWT_SECRET, async (err, authData) => {
+        if (err) {
+          res.sendStatus(401);
+        } else {
+          if (!errors.isEmpty()) {
+            res.json({
+              status: "error",
+              code: 400,
+              message: "invalid data",
+              errors: errors,
+            });
+          } else {
+            await BlogPost.findByIdAndUpdate(req.params.postId, newPost, {});
+            res.sendStatus(202);
+          }
+        }
+      });
+    } else {
+      res.sendStatus(401);
+    }
+  }),
+];
+exports.comment_delete = asyncHandler(async (req, res, next) => {
+  const bearerHeader = req.headers["authorization"];
+  if (bearerHeader) {
+    const bearer = bearerHeader.split(" ");
+    const token = bearer[1];
+    jwt.verify(token, process.env.JWT_SECRET, async (err, authData) => {
+      if (err) {
+        res.sendStatus(401);
+      } else {
+        await Comment.findByIdAndRemove(req.params.commentId);
+        res.sendStatus(200);
+      }
+    });
+  } else {
+    res.sendStatus(401);
+  }
+});
+exports.post_delete = asyncHandler(async (req, res, next) => {
+  const bearerHeader = req.headers["authorization"];
+  if (bearerHeader) {
+    const bearer = bearerHeader.split(" ");
+    const token = bearer[1];
+    jwt.verify(token, process.env.JWT_SECRET, async (err, authData) => {
+      if (err) {
+        res.sendStatus(401);
+      } else {
+        await Promise.all([
+          BlogPost.findByIdAndRemove(req.params.postId),
+          Comment.deleteMany({ Post_reference: req.params.postId }),
+        ]);
+        await BlogPost.findByIdAndRemove(req.params.postId);
+        res.sendStatus(200);
+      }
+    });
+  } else {
+    res.sendStatus(401);
+  }
+});
