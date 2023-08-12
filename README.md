@@ -1,12 +1,12 @@
-# Blog-API
+# Blog-API Odin project curriculum
 
-### An api project from the odin project curriculum. Stores and retrieves post in a database.
-There will be 2 portals; a blogger portal with a secured username and password and a regular user portal.
-### The blogger portal:
-- Allows blogger to create articles.
-- Allows blogger to publish and unpublish articles.
-- Allows blogger to delete comments on articles.
+### Project description:
+In this project I created a RESTful api that allows an authorized user to perform CRUD operations on a database for blog posts.
+Anyone other than the admin can view public posts and create comments on them. The admin also has the ability to delete these comments.
 
-### The regular user portal:
-- Allows users to view all published articles from newest to oldest.
--Allows users to comment on published articles and like other users' comments and like the article itself.
+### tool kit description:
+The packages I used during this project include:
+- express generator to create the boilerplate project directory.
+- json web tokens to authenticate the admin user's access on every protected operation route.
+- mongoose to access the mongo db database.
+- curl command to test each route.
