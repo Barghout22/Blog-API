@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const adminController = require("../controllers/adminController");
-const postController = require("../controllers/postController");
 const commentController = require("../controllers/commentController");
 
 /* GET home page. */

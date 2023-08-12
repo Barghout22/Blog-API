@@ -33,9 +33,14 @@ exports.admin_login = asyncHandler(async (req, res, next) => {
   if (!match) {
     res.status(403).send("incorrect password");
   }
-  jwt.sign({ admin }, process.env.JWT_SECRET, (err, token) => {
-    res.json({ token });
-  });
+  jwt.sign(
+    { admin },
+    process.env.JWT_SECRET,
+    { expiresIn: "1d" },
+    (err, token) => {
+      res.json({ token });
+    }
+  );
 });
 exports.get_posts = asyncHandler(async (req, res, next) => {
   const bearerHeader = req.headers["authorization"];
